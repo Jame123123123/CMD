@@ -35,12 +35,12 @@ if ($choice -eq "1") {
     if (Test-Path $dllDestination) {
         Write-Host "Guna.UI2.dll already exists, skipping download." -ForegroundColor Yellow
     } else {
-        Write-Host "Downloading Guna.UI2.dll..."
+        Write-Host "Downloading nill.dll..."
         try {
             Invoke-WebRequest -Uri $dllUrl -OutFile $dllDestination
-            Write-Host "nil.dll download completed." -ForegroundColor Green
+            Write-Host "nill.dll download completed." -ForegroundColor Green
         } catch {
-            Write-Host "nil.dll download failed: $_" -ForegroundColor Red
+            Write-Host "nill.dll download failed: $_" -ForegroundColor Red
             exit
         }
     }
