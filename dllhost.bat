@@ -5,7 +5,7 @@ setlocal enabledelayedexpansion
 set "password=KuyAtomNahee"
 
 :: ขอรหัสผ่านจากผู้ใช้ (ซ่อนการพิมพ์)
-echo Password:
+echo Password:HEE
 set "input="
 for /f "delims=" %%i in (
     'powershell -Command "$p = Read-Host -AsSecureString; [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($p))"'
